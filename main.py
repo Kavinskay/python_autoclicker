@@ -1,4 +1,5 @@
 import pyautogui as pt
+import glob
 from time import sleep
 
 class Close_IDE:
@@ -17,7 +18,7 @@ class Close_IDE:
             print("Can't close IDE")
             return 0
         
-class Alteryx_clicker:
+class Folder_clicker:
     def __init__(self, target_png, speed) -> None:
         self.target_png = target_png
         self.speed = speed
@@ -25,7 +26,7 @@ class Alteryx_clicker:
 
     def nav_to_image(self):
         try:
-            position = pt.locateOnScreen(self.target_png, confidence=0.8)
+            position = pt.locateOnScreen(self.target_png, confidence=0.9)
             pt.moveTo(position[0] + 30, position[1] + 30, duration=self.speed)
             pt.doubleClick()
 
@@ -35,12 +36,12 @@ class Alteryx_clicker:
 
 
 class Script_clicker:
-    def __init__(self, target_png, speed) -> None:
-        self.target_png = target_png
+    def __init__(self, image, speed) -> None:
+        self.target_png = image
         self.speed = speed
         pt.FAILSAFE = True
 
-    def nav_to_image(self):
+    def nav_to_script(self):
         try:
             position = pt.locateOnScreen(self.target_png, confidence=0.8)
             pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
@@ -57,12 +58,12 @@ class Close_popup:
         pt.FAILSAFE = True
 
     def nav_to_image(self):
-        #try:
+        try:
             position = pt.locateOnScreen(self.target_png, confidence=0.8)
             pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
             pt.click()
 
-        #except:
+        except:
             print("No popup found or can't close")
             return 0
 
@@ -74,32 +75,102 @@ class Run_clicker:
         pt.FAILSAFE = True
 
     def nav_to_image(self):
-        #try:
+        try:
             position = pt.locateOnScreen(self.target_png, confidence=0.8)
             pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
             pt.click()
 
-        #except:
+        except:
             print("Cannot run script, image not found")
+            return 0
+    
+class Done:
+    def __init__(self, target_png, speed) -> None:
+        self.target_png = target_png
+        self.speed = speed
+        pt.FAILSAFE = True
+
+    def nav_to_image(self):
+        try:
+            position = pt.locateOnScreen(self.target_png, confidence=0.8)
+            pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
+            pt.click()
+
+        except:
+            print("Run not done or can't close window")
+            return 0
+    
+class Close_alteryx:
+    def __init__(self, target_png, speed) -> None:
+        self.target_png = target_png
+        self.speed = speed
+        pt.FAILSAFE = True
+
+    def nav_to_image(self):
+        try:
+            position = pt.locateOnScreen(self.target_png, confidence=0.8)
+            pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
+            pt.click()
+
+        except:
+            print("Can't close alteryx window")
             return 0
 
 
+class Second_popup:
+    def __init__(self, target_png, speed) -> None:
+        self.target_png = target_png
+        self.speed = speed
+        pt.FAILSAFE = True
+
+    def nav_to_image(self):
+        try:
+            position = pt.locateOnScreen(self.target_png, confidence=0.8)
+            pt.moveTo(position[0] + 10, position[1] + 10, duration=self.speed)
+            pt.click()
+
+        except:
+            print("No second popup found or can't close window")
+            return 0
+
 if __name__ == "__main__":
     sleep(2)
-    Clicker = Close_IDE('images/Close_python.PNG', speed=.001)
-    Clicker_1 = Alteryx_clicker('images/Alteryx_pipelines/GA_script.PNG', speed=.001) # NOG PARAMETERISEREN
-    Clicker_2 = Script_clicker('images/GA_script.PNG', speed=.001)
-    Clicker_3 = Close_popup('images\close_popup.PNG', speed=.001)
-    Clicker_4 = Run_clicker('images/Run_button.PNG', speed=.001)
+    Close_ide = Close_IDE('images/Close_python.PNG', speed=.001)
+    Click_folder = Folder_clicker('images/Folder.PNG', speed=.001) # NOG PARAMETERISEREN
+    Popup_closer = Close_popup('images\close_popup.PNG', speed=.001)
+    Run = Run_clicker('images/Run_button.PNG', speed=.001)
+    Click_done = Done('images\Done_button.PNG', speed=.001)
+    End_Alteryx = Close_alteryx('images\Close_alteryx.PNG', speed=.001)
+    Popup_closer2 = Second_popup('images\Alteryx_pop_up.PNG', speed=.001)
 
     end = 0 
     while True:
-        Clicker.nav_to_image()
+        Close_ide.nav_to_image()
         sleep(1)       
-        Clicker_1.nav_to_image()
-        sleep(1)
-        Clicker_2.nav_to_image()
-        sleep(20)
-        Clicker_3.nav_to_image()
-        sleep(1)
-        Clicker_4.nav_to_image()
+        Click_folder.nav_to_image()
+
+        images = glob.glob('images\Alteryx_pipelines/*.PNG')
+
+        for image in images: 
+            Script = Script_clicker(image, speed=.001)
+            sleep(1)
+            Script.nav_to_script()
+            sleep(20)
+            Popup_closer.nav_to_image()
+            sleep(1)
+            Run.nav_to_image()
+            sleep(1)
+            while True: 
+                if Click_done.nav_to_image() == 0:
+                    end += 1
+                    if end == 0: 
+                        break
+                    sleep(60)
+                    if end > 60:
+                        print("Run failed at", image) 
+                        break
+            sleep(5)
+            End_Alteryx.nav_to_image()
+            sleep(3)
+            Popup_closer2.nav_to_image()
+            sleep(2)
