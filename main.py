@@ -134,9 +134,10 @@ class Second_popup:
             return 0
 
 if __name__ == "__main__":
+    pt.FAILSAFE = True
     sleep(2)
     Close_ide = Close_IDE('images/Close_python.PNG', speed=.001)
-    Click_folder = Folder_clicker('images/Folder.PNG', speed=.001) # NOG PARAMETERISEREN
+    Click_folder = Folder_clicker('images/Folder.PNG', speed=.001) 
     Popup_closer = Close_popup('images\close_popup.PNG', speed=.001)
     Run = Run_clicker('images/Run_button.PNG', speed=.001)
     Click_done = Done('images\Done_button.PNG', speed=.001)
@@ -160,17 +161,33 @@ if __name__ == "__main__":
             sleep(1)
             Run.nav_to_image()
             sleep(1)
-            while True: 
-                if Click_done.nav_to_image() == 0:
-                    end += 1
-                    if end == 0: 
-                        break
+
+            for run in range(60): 
+                succeeded = Click_done.nav_to_image() != 0
+                if succeeded:
+                    break
+                else:
                     sleep(60)
-                    if end > 60:
-                        print("Run failed at", image) 
-                        break
+            
+            if not succeeded:
+                print(f"Run failed at {image} on run:{run}") 
+            
             sleep(5)
             End_Alteryx.nav_to_image()
             sleep(3)
             Popup_closer2.nav_to_image()
             sleep(2)
+
+
+
+# def nav_to_image(self, target_png, speed):
+#     position = pt.locateOnScreen(target_png, confidence=0.8)
+#     pt.moveTo(position[0] + 10, position[1] + 10, duration=speed)
+#     pt.click()
+
+# try:
+#     nav_to_image()
+# except:
+#     print("No second popup found or can't close window")
+
+
